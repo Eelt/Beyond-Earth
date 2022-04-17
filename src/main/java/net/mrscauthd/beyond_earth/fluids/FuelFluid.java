@@ -18,12 +18,12 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.mrscauthd.beyond_earth.BeyondEarthMod;
 import net.mrscauthd.beyond_earth.registries.BlocksRegistry;
 import net.mrscauthd.beyond_earth.registries.FluidsRegistry;
@@ -32,7 +32,24 @@ import net.mrscauthd.beyond_earth.registries.ItemsRegistry;
 import javax.annotation.Nullable;
 import java.util.Random;
 
-public class FuelFluid extends FlowingFluid {
+public class FuelFluid extends ForgeFlowingFluid {
+	private static FluidAttributes.Builder ATTRIBUTES_BUILDER = net.minecraftforge.fluids.FluidAttributes.builder(
+					new ResourceLocation(BeyondEarthMod.MODID,"blocks/fluid_fuel_still"),
+					new ResourceLocation(BeyondEarthMod.MODID,"blocks/fluid_fuel_flow"))
+			.overlay(new ResourceLocation(BeyondEarthMod.MODID,"blocks/fuel_overlay"))
+			.translationKey("block." + BeyondEarthMod.MODID + ".fuel")
+			.sound(SoundEvents.BUCKET_FILL, SoundEvents.BUCKET_EMPTY);
+
+
+	public FuelFluid() {
+		super(new ForgeFlowingFluid.Properties(
+						() -> FluidsRegistry.FUEL_STILL.get(),
+						() -> FluidsRegistry.FLOWING_FUEL.get(),
+						ATTRIBUTES_BUILDER
+				).bucket(() -> ItemsRegistry.FUEL_BUCKET.get()).block(() -> BlocksRegistry.FUEL_BLOCK.get())
+		);
+	}
+
 	@Override
 	public Fluid getFlowing() {
 		return FluidsRegistry.FLOWING_FUEL.get();
@@ -123,16 +140,14 @@ public class FuelFluid extends FlowingFluid {
 
 	@Override
 	protected FluidAttributes createAttributes() {
-		return net.minecraftforge.fluids.FluidAttributes.builder(
-			new ResourceLocation(BeyondEarthMod.MODID,"blocks/fluid_fuel_still"),
-			new ResourceLocation(BeyondEarthMod.MODID,"blocks/fluid_fuel_flow"))
-				.overlay(new ResourceLocation(BeyondEarthMod.MODID,"blocks/fuel_overlay"))
-				.translationKey("block." + BeyondEarthMod.MODID + ".fuel")
-				.sound(SoundEvents.BUCKET_FILL, SoundEvents.BUCKET_EMPTY)
-				.build(this);
+		return ATTRIBUTES_BUILDER.build(this);
 	}
 
 	public static class Flowing extends FuelFluid {
+		public Flowing() {
+			super();
+		}
+
 		@Override
 		protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> p_76046_) {
 			super.createFluidStateDefinition(p_76046_);
@@ -151,6 +166,10 @@ public class FuelFluid extends FlowingFluid {
 	}
 
 	public static class Source extends FuelFluid {
+		public Source() {
+			super();
+		}
+
 		@Override
 		public int getAmount(FluidState p_164509_) {
 			return 8;
